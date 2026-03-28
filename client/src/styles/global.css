@@ -1,0 +1,230 @@
+/* ==================== RESET & FOUNDATION ==================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Deep Blue palette — from fondo.jpg */
+  --midnight-950: #061a2e;
+  --midnight-900: #0b2740;
+  --midnight-800: #0e3a5c;
+  --midnight-700: #135a82;
+  --midnight-600: #1a73a5;
+  --midnight-500: #2389b9;
+
+  /* Warm gold — from logo ring */
+  --gold-600: #b8860b;
+  --gold-500: #d4a017;
+  --gold-400: #e8c31e;
+  --gold-300: #f0d040;
+  --gold-200: #f5e06a;
+  --gold-100: #faf0a0;
+  --gold-50:  #fdf8d8;
+
+  /* Terracotta accent */
+  --terra-600: #8c4425;
+  --terra-500: #b85c38;
+  --terra-400: #d4794f;
+  --terra-100: #fce8dd;
+
+  /* Sage — for success states */
+  --sage-700: #2d5a3d;
+  --sage-600: #3a7a52;
+  --sage-500: #4a9966;
+  --sage-400: #5cb87a;
+  --sage-100: #ddf0e4;
+
+  /* Rose — for error/danger */
+  --rose-600: #a33b3b;
+  --rose-500: #c94a4a;
+  --rose-400: #e06666;
+  --rose-100: #fde8e8;
+
+  /* Cream neutrals */
+  --cream-50:  #fdfcfa;
+  --cream-100: #f5f2ed;
+  --cream-200: #e8e2d8;
+  --cream-300: #d6cfc4;
+  --cream-400: #b3a999;
+  --cream-500: #8f8475;
+  --cream-600: #6b6054;
+  --cream-700: #4a4238;
+  --cream-800: #302a24;
+  --cream-900: #1a1612;
+
+  /* Typography */
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Shadows — blue-tinted */
+  --shadow-sm: 0 1px 3px rgba(6,26,46,0.08), 0 1px 2px rgba(6,26,46,0.05);
+  --shadow-md: 0 4px 16px rgba(6,26,46,0.1), 0 2px 4px rgba(6,26,46,0.05);
+  --shadow-lg: 0 12px 40px rgba(6,26,46,0.14), 0 4px 12px rgba(6,26,46,0.07);
+  --shadow-xl: 0 24px 64px rgba(6,26,46,0.18), 0 8px 20px rgba(6,26,46,0.1);
+  --shadow-gold: 0 8px 32px rgba(212,160,23,0.25);
+  --shadow-glow: 0 0 40px rgba(212,160,23,0.2);
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-fast: 0.15s var(--ease-out);
+  --t-normal: 0.3s var(--ease-out);
+  --t-slow: 0.5s var(--ease-out);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream-100);
+  color: var(--cream-900);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* ==================== DARK MODE ==================== */
+.dark {
+  --midnight-950: #c8dced;
+  --midnight-900: #0d1f30;
+  --midnight-800: #b0c8dd;
+  --midnight-700: #1a73a5;
+  --midnight-600: #2389b9;
+  --midnight-500: #3da0d0;
+
+  --cream-50:  #111a24;
+  --cream-100: #162232;
+  --cream-200: #1e3044;
+  --cream-300: #2a4460;
+  --cream-400: #5a7a96;
+  --cream-500: #8ba6bc;
+  --cream-600: #a8c0d4;
+  --cream-700: #c4d6e6;
+  --cream-800: #dde9f2;
+  --cream-900: #eef4f9;
+
+  --gold-600: #d4a017;
+  --gold-500: #e8c31e;
+  --gold-400: #f0d040;
+  --gold-300: #f5e06a;
+  --gold-200: #504018;
+  --gold-100: #3a2e12;
+  --gold-50:  #2a2210;
+
+  --sage-700: #6ac58a;
+  --sage-600: #4fb070;
+  --sage-500: #4a9966;
+  --sage-400: #5cb87a;
+  --sage-100: #142a1c;
+
+  --rose-600: #ef6b6b;
+  --rose-500: #c94a4a;
+  --rose-400: #e06666;
+  --rose-100: #2d1515;
+
+  --terra-600: #d4794f;
+  --terra-500: #e08b5e;
+  --terra-400: #eba070;
+  --terra-100: #2d1d14;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,0.45), 0 8px 20px rgba(0,0,0,0.3);
+  --shadow-gold: 0 8px 32px rgba(212,160,23,0.15);
+  --shadow-glow: 0 0 40px rgba(212,160,23,0.12);
+}
+
+/* ==================== GRAIN OVERLAY ==================== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+/* ==================== TYPOGRAPHY UTILITIES ==================== */
+input, select, textarea, button {
+  font-family: var(--font-body);
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes revealScale {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.12); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmerGold {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.reveal {
+  animation: revealUp 0.6s var(--ease-out) both;
+}
+
+.reveal-1 { animation-delay: 0.05s; }
+.reveal-2 { animation-delay: 0.12s; }
+.reveal-3 { animation-delay: 0.2s; }
+.reveal-4 { animation-delay: 0.3s; }
+.reveal-5 { animation-delay: 0.4s; }
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream-200);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cream-400);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cream-500);
+}
+
+/* ==================== SELECTION ==================== */
+::selection {
+  background: var(--gold-200);
+  color: var(--midnight-900);
+}

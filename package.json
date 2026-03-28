@@ -1,0 +1,22 @@
+{
+  "name": "registro-congreso-iglesias-sanas",
+  "version": "1.0.0",
+  "description": "Sistema de registro para el Congreso Anual Iglesias Sanas - Convención Regional Bautista Betsaida",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "cd client && npm run build",
+    "install:client": "cd client && npm install",
+    "setup": "npm install && npm run install:client && npm run build"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "nodemailer": "^8.0.4",
+    "sql.js": "^1.11.0"
+  }
+}

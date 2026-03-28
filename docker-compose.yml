@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET:-cambiar-este-secreto-en-produccion}
+    volumes:
+      - db_data:/app/data
+      - ./images:/app/images
+    restart: unless-stopped
+
+volumes:
+  db_data:

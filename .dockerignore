@@ -1,0 +1,9 @@
+node_modules
+client/node_modules
+public_react
+.git
+.env
+congreso.db
+*.md
+.agents
+.claude
