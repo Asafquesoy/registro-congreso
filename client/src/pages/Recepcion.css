@@ -392,6 +392,105 @@
 }
 
 /* ================================================================
+   PASSWORD TOGGLE
+   ================================================================ */
+.auth-field-password-wrap {
+  position: relative;
+  flex: 1;
+}
+.auth-field-password-wrap input {
+  width: 100%;
+  padding: 13px 44px 13px 0;
+  font-size: 0.95rem;
+  border: none;
+  background: transparent;
+  color: var(--cream-900);
+  outline: none;
+}
+.auth-field-password-wrap input::placeholder {
+  color: var(--cream-400);
+}
+.password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cream-400);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.password-toggle:hover {
+  color: var(--midnight-600);
+  background: var(--cream-100);
+}
+
+/* ================================================================
+   PERSONA STATUS & BUTTONS
+   ================================================================ */
+.persona-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.persona-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.status-attend-yes {
+  background: #dfe9f3;
+  color: var(--midnight-700);
+}
+.status-attend-no {
+  background: var(--cream-100);
+  color: var(--cream-500);
+  border: 1px solid var(--cream-300);
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--t-normal);
+}
+.btn-action--pago {
+  color: white;
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  box-shadow: 0 4px 14px rgba(201,150,43,0.25);
+}
+.btn-action--pago:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(201,150,43,0.3);
+}
+.btn-action--asistio {
+  color: white;
+  background: linear-gradient(135deg, var(--midnight-600), var(--midnight-500));
+  box-shadow: 0 4px 14px rgba(26,115,165,0.25);
+}
+.btn-action--asistio:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(26,115,165,0.3);
+}
+
+/* ================================================================
    DARK MODE OVERRIDES (Recepcion)
    ================================================================ */
 .dark .search-input input,
@@ -429,7 +528,9 @@
   .sitio-form { padding: 0 16px 16px; }
   .sitio-toggle { padding: 14px 16px; font-size: 0.92rem; }
   .persona-actions { flex-direction: column; align-items: stretch; }
+  .persona-btn-row { flex-direction: column; }
   .btn-pay { justify-content: center; text-align: center; }
+  .btn-action { justify-content: center; }
   .btn-undo { text-align: center; }
   .status-pill { justify-content: center; }
 }

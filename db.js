@@ -27,9 +27,10 @@ async function initDB() {
       nombre TEXT NOT NULL,
       apellidos TEXT NOT NULL,
       iglesia TEXT NOT NULL,
-      telefono TEXT NOT NULL UNIQUE,
-      correo TEXT NOT NULL UNIQUE,
-      taller TEXT NOT NULL,
+      telefono TEXT DEFAULT '',
+      correo TEXT DEFAULT '',
+      taller TEXT DEFAULT '',
+      ciudad TEXT DEFAULT '',
       fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
       pagado INTEGER DEFAULT 0,
       asistio INTEGER DEFAULT 0
@@ -54,6 +55,36 @@ async function initDB() {
   try {
     db.run("ALTER TABLE usuarios ADD COLUMN debe_cambiar_password INTEGER DEFAULT 0");
   } catch (e) { /* columna ya existe */ }
+
+  // Migrar tabla registros: agregar columna ciudad
+  try {
+    db.run("ALTER TABLE registros ADD COLUMN ciudad TEXT DEFAULT ''");
+  } catch (e) { /* columna ya existe */ }
+
+  // Migrar tabla registros: relajar constraints (correo/taller/telefono opcionales)
+  // SQLite no permite ALTER constraints, así que recreamos la tabla si tiene constraints UNIQUE en correo
+  try {
+    const tableInfo = db.exec("SELECT sql FROM sqlite_master WHERE type='table' AND name='registros'");
+    if (tableInfo.length > 0 && tableInfo[0].values[0][0].includes('correo TEXT NOT NULL UNIQUE')) {
+      db.run(`CREATE TABLE IF NOT EXISTS registros_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        apellidos TEXT NOT NULL,
+        iglesia TEXT NOT NULL,
+        telefono TEXT DEFAULT '',
+        correo TEXT DEFAULT '',
+        taller TEXT DEFAULT '',
+        ciudad TEXT DEFAULT '',
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+        pagado INTEGER DEFAULT 0,
+        asistio INTEGER DEFAULT 0
+      )`);
+      db.run(`INSERT INTO registros_new (id, nombre, apellidos, iglesia, telefono, correo, taller, ciudad, fecha_registro, pagado, asistio)
+        SELECT id, nombre, apellidos, iglesia, telefono, correo, taller, COALESCE(ciudad, ''), fecha_registro, pagado, asistio FROM registros`);
+      db.run('DROP TABLE registros');
+      db.run('ALTER TABLE registros_new RENAME TO registros');
+    }
+  } catch (e) { console.error('Migration error:', e.message); }
 
   db.run(`
     CREATE TABLE IF NOT EXISTS configuracion (

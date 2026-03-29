@@ -370,7 +370,7 @@
 }
 .reg-header-title {
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #ffffff;
   margin-top: 14px;
@@ -404,7 +404,7 @@
 }
 .reg-card-top h3 {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: var(--midnight-800);
 }
@@ -438,17 +438,24 @@
 .field { margin-bottom: 22px; }
 .field label {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--cream-600);
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+}
+.field-optional {
+  font-size: 0.8rem;
+  text-transform: none;
+  color: var(--cream-400);
+  font-weight: 500;
+  letter-spacing: 0;
 }
 .field input, .field select {
   width: 100%;
-  padding: 13px 16px;
-  font-size: 0.95rem;
+  padding: 16px 18px;
+  font-size: 1.1rem;
   border: 1.5px solid var(--cream-300);
   border-radius: var(--r-md);
   background: white;
@@ -472,9 +479,9 @@
 }
 .field-hint {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--cream-500);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .reg-submit {
@@ -483,8 +490,8 @@
   justify-content: center;
   gap: 10px;
   width: 100%;
-  padding: 16px;
-  font-size: 1rem;
+  padding: 18px;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -743,7 +750,7 @@
   border-radius: 8px;
 }
 .conf-dato-label {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--cream-500);
   text-transform: uppercase;
@@ -753,7 +760,7 @@
 .conf-dato-value {
   font-weight: 600;
   color: var(--midnight-800);
-  font-size: 0.92rem;
+  font-size: 1.05rem;
 }
 
 /* Footer */
@@ -934,5 +941,5 @@
   .hero-year { letter-spacing: 5px; font-size: 0.95rem; }
   .conf-header-content { flex-direction: column; text-align: center; }
   .conf-header-text { text-align: center; }
-  .field input, .field select { padding: 11px 14px; font-size: 0.9rem; }
+  .field input, .field select { padding: 14px 16px; font-size: 1rem; }
 }

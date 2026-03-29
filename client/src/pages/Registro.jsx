@@ -1,15 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import './Registro.css'
 
-const TALLERES = [
-  'Liderazgo Pastoral',
-  'Educación Cristiana',
-  'Música y Adoración',
-  'Familia y Matrimonio',
-  'Evangelismo y Misiones',
-  'Juventud y Adolescencia'
-]
-
 function DecoLine() {
   return (
     <div className="deco-line">
@@ -45,7 +36,7 @@ export default function Registro() {
   const [transitioning, setTransitioning] = useState(false)
   const [slideDir, setSlideDir] = useState('') // 'left' or 'right'
   const [form, setForm] = useState({
-    nombre: '', apellidos: '', iglesia: '', telefono: '', correo: '', taller: ''
+    nombre: '', apellidos: '', iglesia: '', ciudad: '', telefono: ''
   })
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -106,7 +97,7 @@ export default function Registro() {
 
       setConfirmacion({ ...form })
       navigateTo('confirmacion', 'left')
-      setForm({ nombre: '', apellidos: '', iglesia: '', telefono: '', correo: '', taller: '' })
+      setForm({ nombre: '', apellidos: '', iglesia: '', ciudad: '', telefono: '' })
     } catch {
       setError('Error de conexión. Intente de nuevo.')
     } finally {
@@ -242,29 +233,20 @@ export default function Registro() {
                       onChange={handleChange} placeholder="Nombre de su iglesia" required />
                   </div>
 
-                  <div className="reg-grid">
-                    <div className="field field-anim" style={{ '--fi': 3 }}>
-                      <label htmlFor="telefono">Número de teléfono</label>
-                      <input type="tel" id="telefono" name="telefono" value={form.telefono}
-                        onChange={handleChange} placeholder="Ej: 831 123 4567" required autoComplete="tel" />
-                      <span className="field-hint">Escriba su número a 10 dígitos</span>
-                    </div>
-                    <div className="field field-anim" style={{ '--fi': 4 }}>
-                      <label htmlFor="correo">Correo electrónico</label>
-                      <input type="email" id="correo" name="correo" value={form.correo}
-                        onChange={handleChange} placeholder="ejemplo@correo.com" required autoComplete="email" />
-                    </div>
+                  <div className="field field-anim" style={{ '--fi': 3 }}>
+                    <label htmlFor="ciudad">Ciudad de procedencia</label>
+                    <input type="text" id="ciudad" name="ciudad" value={form.ciudad}
+                      onChange={handleChange} placeholder="Ej: Ciudad Mante" required />
                   </div>
 
-                  <div className="field field-anim" style={{ '--fi': 5 }}>
-                    <label htmlFor="taller">Taller que desea tomar</label>
-                    <select id="taller" name="taller" value={form.taller} onChange={handleChange} required>
-                      <option value="">Seleccione un taller</option>
-                      {TALLERES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                  <div className="field field-anim" style={{ '--fi': 4 }}>
+                    <label htmlFor="telefono">Número de teléfono <span className="field-optional">(opcional)</span></label>
+                    <input type="tel" id="telefono" name="telefono" value={form.telefono}
+                      onChange={handleChange} placeholder="Ej: 831 123 4567" autoComplete="tel" />
+                    <span className="field-hint">Si lo proporciona, escriba su número a 10 dígitos</span>
                   </div>
 
-                  <div className="field-anim" style={{ '--fi': 6 }}>
+                  <div className="field-anim" style={{ '--fi': 5 }}>
                     <button type="submit" className="reg-submit" disabled={enviando}>
                       {enviando ? (
                         <><span className="reg-spinner" />Enviando...</>
@@ -323,17 +305,15 @@ export default function Registro() {
                   {[
                     ['person', 'Nombre', `${confirmacion.nombre} ${confirmacion.apellidos}`],
                     ['church', 'Iglesia', confirmacion.iglesia],
-                    ['phone', 'Teléfono', confirmacion.telefono],
-                    ['mail', 'Correo', confirmacion.correo],
-                    ['book', 'Taller', confirmacion.taller],
+                    ['city', 'Ciudad', confirmacion.ciudad],
+                    ...(confirmacion.telefono ? [['phone', 'Teléfono', confirmacion.telefono]] : []),
                   ].map(([iconType, label, value], i) => (
                     <div className="conf-dato conf-dato-anim" key={label} style={{ '--di': i }}>
                       <span className="conf-dato-icon">
                         {iconType === 'person' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
                         {iconType === 'church' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>}
+                        {iconType === 'city' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>}
                         {iconType === 'phone' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.11 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>}
-                        {iconType === 'mail' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>}
-                        {iconType === 'book' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>}
                       </span>
                       <div className="conf-dato-text">
                         <span className="conf-dato-label">{label}</span>
@@ -355,18 +335,6 @@ export default function Registro() {
                 <p className="conf-cost">
                   El costo de inscripción es de <strong>$50 MXN</strong> y se paga el día del evento.
                 </p>
-
-                <div className="conf-message">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <span>Recibirá un correo de confirmación con los detalles</span>
-                </div>
-
-                <div className="conf-spam-warning">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  <span>Si no encuentra el correo en su bandeja de entrada, revise la carpeta de <strong>spam</strong> o <strong>correo no deseado</strong></span>
-                </div>
 
                 <button className="conf-btn" onClick={() => navigateTo('bienvenida', 'right')}>
                   Volver al Inicio

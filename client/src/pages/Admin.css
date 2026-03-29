@@ -143,6 +143,46 @@
 }
 
 /* ================================================================
+   PASSWORD TOGGLE
+   ================================================================ */
+.auth-field-password-wrap {
+  position: relative;
+  flex: 1;
+}
+.auth-field-password-wrap input {
+  width: 100%;
+  padding: 13px 44px 13px 0;
+  font-size: 0.95rem;
+  border: none;
+  background: transparent;
+  color: var(--cream-900);
+  outline: none;
+}
+.auth-field-password-wrap input::placeholder {
+  color: var(--cream-400);
+}
+.password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--cream-400);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.password-toggle:hover {
+  color: var(--midnight-600);
+  background: var(--cream-100);
+}
+
+/* ================================================================
    ADMIN LAYOUT
    ================================================================ */
 .admin {

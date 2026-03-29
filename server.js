@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -41,8 +43,44 @@ async function enviarCorreo(to, subject, html) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Allow inline styles/scripts from React build
+  crossOriginEmbedderPolicy: false
+}));
+
+// Trust proxy (for Digital Ocean / nginx reverse proxy)
+app.set('trust proxy', 1);
+
+// Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes. Intente de nuevo en unos minutos.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de inicio de sesión. Intente de nuevo en 15 minutos.' }
+});
+
+const registroLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados registros desde esta dirección. Intente de nuevo más tarde.' }
+});
+
+app.use('/api/', generalLimiter);
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Servir imágenes
 app.use('/images', express.static(path.resolve(__dirname, 'images')));
@@ -57,7 +95,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     maxAge: 8 * 60 * 60 * 1000, // 8 horas
-    secure: process.env.NODE_ENV === 'production' && process.env.FORCE_HTTPS === 'true'
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
   }
 }));
 
@@ -88,7 +128,7 @@ app.get('/api/registro-abierto', (req, res) => {
 
 // ==================== AUTH ====================
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', authLimiter, (req, res) => {
   const { username, password } = req.body;
   const user = queryOne('SELECT * FROM usuarios WHERE username = ?', [username]);
 
@@ -112,75 +152,38 @@ app.get('/api/me', (req, res) => {
 
 // ==================== REGISTRO PÚBLICO ====================
 
-app.post('/api/registro', (req, res) => {
+app.post('/api/registro', registroLimiter, (req, res) => {
   const config = queryOne("SELECT valor FROM configuracion WHERE clave = 'registro_abierto'");
   if (config && config.valor !== '1') {
     return res.status(403).json({ error: 'El registro está cerrado por el momento' });
   }
 
-  const { nombre, apellidos, iglesia, telefono, correo, taller } = req.body;
+  const { nombre, apellidos, iglesia, ciudad, telefono } = req.body;
 
-  if (!nombre || !apellidos || !iglesia || !telefono || !correo || !taller) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  if (!nombre || !apellidos || !iglesia || !ciudad) {
+    return res.status(400).json({ error: 'Nombre, apellidos, iglesia y ciudad son obligatorios' });
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(correo)) {
-    return res.status(400).json({ error: 'El correo electrónico no es válido' });
-  }
+  let telefonoLimpio = '';
+  if (telefono && telefono.trim()) {
+    telefonoLimpio = telefono.replace(/\D/g, '');
+    if (telefonoLimpio.length < 10) {
+      return res.status(400).json({ error: 'El número de teléfono debe tener al menos 10 dígitos' });
+    }
 
-  const telefonoLimpio = telefono.replace(/\D/g, '');
-  if (telefonoLimpio.length < 10) {
-    return res.status(400).json({ error: 'El número de teléfono debe tener al menos 10 dígitos' });
-  }
-
-  const existeCorreo = queryOne('SELECT id FROM registros WHERE correo = ?', [correo.toLowerCase().trim()]);
-  if (existeCorreo) {
-    return res.status(409).json({ error: 'Ya existe un registro con este correo electrónico' });
-  }
-
-  const existeTelefono = queryOne('SELECT id FROM registros WHERE telefono = ?', [telefonoLimpio]);
-  if (existeTelefono) {
-    return res.status(409).json({ error: 'Ya existe un registro con este número de teléfono' });
+    const existeTelefono = queryOne("SELECT id FROM registros WHERE telefono = ? AND telefono != ''", [telefonoLimpio]);
+    if (existeTelefono) {
+      return res.status(409).json({ error: 'Ya existe un registro con este número de teléfono' });
+    }
   }
 
   try {
     execute(
-      'INSERT INTO registros (nombre, apellidos, iglesia, telefono, correo, taller) VALUES (?, ?, ?, ?, ?, ?)',
-      [nombre.trim(), apellidos.trim(), iglesia.trim(), telefonoLimpio, correo.toLowerCase().trim(), taller]
+      'INSERT INTO registros (nombre, apellidos, iglesia, ciudad, telefono) VALUES (?, ?, ?, ?, ?)',
+      [nombre.trim(), apellidos.trim(), iglesia.trim(), ciudad.trim(), telefonoLimpio]
     );
 
     const id = lastInsertId();
-
-    // Enviar correo de confirmación (no bloquea la respuesta)
-    enviarCorreo(correo.toLowerCase().trim(), 'Confirmación de Registro - Congreso Iglesias Sanas 2026', `
-      <div style="max-width:600px;margin:0 auto;font-family:Georgia,serif;background:#faf6f0;padding:0;">
-        <div style="background:#0f1729;padding:32px 24px;text-align:center;">
-          <h1 style="color:#e8b84b;font-size:24px;margin:0;">Congreso Iglesias Sanas</h1>
-          <p style="color:#c9962b;font-size:13px;letter-spacing:2px;margin:8px 0 0;text-transform:uppercase;">Convención Regional Bautista Betsaida</p>
-        </div>
-        <div style="padding:32px 28px;">
-          <h2 style="color:#3a7a52;font-size:22px;margin:0 0 8px;">¡Registro Exitoso!</h2>
-          <p style="color:#786a5c;font-size:15px;line-height:1.6;">
-            Hola <strong>${nombre.trim()}</strong>, su registro para el Congreso Iglesias Sanas 2026 ha sido confirmado.
-          </p>
-          <div style="background:white;border-radius:12px;padding:20px;margin:20px 0;border:1px solid #e5dace;">
-            <table style="width:100%;font-size:14px;color:#3a332c;">
-              <tr><td style="padding:6px 0;color:#a09182;font-weight:600;">Nombre</td><td style="padding:6px 0;">${nombre.trim()} ${apellidos.trim()}</td></tr>
-              <tr><td style="padding:6px 0;color:#a09182;font-weight:600;">Iglesia</td><td style="padding:6px 0;">${iglesia.trim()}</td></tr>
-              <tr><td style="padding:6px 0;color:#a09182;font-weight:600;">Taller</td><td style="padding:6px 0;">${taller}</td></tr>
-              <tr><td style="padding:6px 0;color:#a09182;font-weight:600;">Teléfono</td><td style="padding:6px 0;">${telefonoLimpio}</td></tr>
-            </table>
-          </div>
-          <div style="background:#fdf8eb;border:1px solid #f5dda0;border-radius:10px;padding:16px;text-align:center;margin:20px 0;">
-            <p style="margin:0;color:#9e7520;font-size:14px;font-weight:600;">📅 1 y 2 de Mayo de 2026 — Ciudad Mante</p>
-            <p style="margin:8px 0 0;color:#786a5c;font-size:13px;">Costo de inscripción: <strong>$50 MXN</strong> (se paga el día del evento)</p>
-          </div>
-          <p style="color:#a09182;font-size:13px;text-align:center;">¡Le esperamos con gusto!</p>
-        </div>
-      </div>
-    `);
-
     res.json({ ok: true, id });
   } catch (err) {
     res.status(500).json({ error: 'Error al guardar el registro. Es posible que ya esté registrado.' });
@@ -193,15 +196,17 @@ app.get('/api/admin/stats', requireAuth('admin', 'visor'), (req, res) => {
   const total = queryOne('SELECT COUNT(*) as total FROM registros');
   const pagados = queryOne('SELECT COUNT(*) as total FROM registros WHERE pagado = 1');
   const asistieron = queryOne('SELECT COUNT(*) as total FROM registros WHERE asistio = 1');
-  const porTaller = queryAll('SELECT taller, COUNT(*) as total FROM registros GROUP BY taller ORDER BY total DESC');
+  const porTaller = queryAll("SELECT taller, COUNT(*) as total FROM registros WHERE taller != '' GROUP BY taller ORDER BY total DESC");
   const porIglesia = queryAll('SELECT iglesia, COUNT(*) as total FROM registros GROUP BY iglesia ORDER BY total DESC');
+  const porCiudad = queryAll("SELECT ciudad, COUNT(*) as total FROM registros WHERE ciudad != '' GROUP BY ciudad ORDER BY total DESC");
 
   res.json({
     totalRegistros: total.total,
     totalPagados: pagados.total,
     totalAsistieron: asistieron.total,
     porTaller,
-    porIglesia
+    porIglesia,
+    porCiudad
   });
 });
 
@@ -213,7 +218,7 @@ app.get('/api/admin/registros', requireAuth('admin', 'visor'), (req, res) => {
 app.get('/api/admin/descargar', requireAuth('admin', 'visor'), (req, res) => {
   const registros = queryAll('SELECT * FROM registros ORDER BY fecha_registro DESC');
 
-  const headers = ['ID', 'Nombre', 'Apellidos', 'Iglesia', 'Teléfono', 'Correo', 'Taller', 'Fecha Registro', 'Pagado', 'Asistió'];
+  const headers = ['ID', 'Nombre', 'Apellidos', 'Iglesia', 'Ciudad', 'Teléfono', 'Fecha Registro', 'Pagado', 'Asistió'];
 
   const csvRows = [headers.join(',')];
   for (const r of registros) {
@@ -222,9 +227,8 @@ app.get('/api/admin/descargar', requireAuth('admin', 'visor'), (req, res) => {
       `"${r.nombre}"`,
       `"${r.apellidos}"`,
       `"${r.iglesia}"`,
-      r.telefono,
-      r.correo,
-      `"${r.taller}"`,
+      `"${r.ciudad || ''}"`,
+      r.telefono || '',
       r.fecha_registro,
       r.pagado ? 'Sí' : 'No',
       r.asistio ? 'Sí' : 'No'
@@ -347,9 +351,8 @@ app.get('/api/admin/descargar-excel', requireAuth('admin', 'visor'), async (req,
     { header: 'Nombre', key: 'nombre', width: 18 },
     { header: 'Apellidos', key: 'apellidos', width: 20 },
     { header: 'Iglesia', key: 'iglesia', width: 25 },
+    { header: 'Ciudad', key: 'ciudad', width: 20 },
     { header: 'Teléfono', key: 'telefono', width: 15 },
-    { header: 'Correo', key: 'correo', width: 28 },
-    { header: 'Taller', key: 'taller', width: 25 },
     { header: 'Fecha Registro', key: 'fecha_registro', width: 20 },
     { header: 'Pagado', key: 'pagado', width: 10 },
     { header: 'Asistió', key: 'asistio', width: 10 },
@@ -370,9 +373,8 @@ app.get('/api/admin/descargar-excel', requireAuth('admin', 'visor'), async (req,
       nombre: r.nombre,
       apellidos: r.apellidos,
       iglesia: r.iglesia,
-      telefono: r.telefono,
-      correo: r.correo,
-      taller: r.taller,
+      ciudad: r.ciudad || '',
+      telefono: r.telefono || '',
       fecha_registro: r.fecha_registro,
       pagado: r.pagado ? 'Sí' : 'No',
       asistio: r.asistio ? 'Sí' : 'No',
@@ -411,22 +413,32 @@ app.get('/api/recepcion/buscar', requireAuth('admin', 'recepcion'), (req, res) =
 
   const busqueda = `%${q.trim()}%`;
   const registros = queryAll(
-    'SELECT * FROM registros WHERE nombre LIKE ? OR apellidos LIKE ? OR telefono LIKE ? OR correo LIKE ? ORDER BY apellidos, nombre',
-    [busqueda, busqueda, busqueda, busqueda]
+    'SELECT * FROM registros WHERE nombre LIKE ? OR apellidos LIKE ? OR telefono LIKE ? OR iglesia LIKE ? OR ciudad LIKE ? ORDER BY apellidos, nombre',
+    [busqueda, busqueda, busqueda, busqueda, busqueda]
   );
 
   res.json(registros);
 });
 
 app.put('/api/recepcion/pago/:id', requireAuth('admin', 'recepcion'), (req, res) => {
-  const { pagado } = req.body;
+  const { pagado, soloAsistencia, pagoYAsistencia } = req.body;
   const registro = queryOne('SELECT nombre, apellidos FROM registros WHERE id = ?', [Number(req.params.id)]);
-  if (pagado) {
+  const nombre = registro ? `${registro.nombre} ${registro.apellidos}` : `ID ${req.params.id}`;
+
+  if (pagoYAsistencia) {
     execute('UPDATE registros SET pagado = 1, asistio = 1 WHERE id = ?', [Number(req.params.id)]);
-    registrarHistorial(req.session.user.username, 'Registró pago y asistencia', registro ? `${registro.nombre} ${registro.apellidos}` : `ID ${req.params.id}`);
-  } else {
-    execute('UPDATE registros SET pagado = 0 WHERE id = ?', [Number(req.params.id)]);
-    registrarHistorial(req.session.user.username, 'Canceló pago', registro ? `${registro.nombre} ${registro.apellidos}` : `ID ${req.params.id}`);
+    registrarHistorial(req.session.user.username, 'Registró pago y asistencia', nombre);
+  } else if (soloAsistencia !== undefined) {
+    execute('UPDATE registros SET asistio = ? WHERE id = ?', [soloAsistencia ? 1 : 0, Number(req.params.id)]);
+    registrarHistorial(req.session.user.username, soloAsistencia ? 'Marcó asistencia' : 'Desmarcó asistencia', nombre);
+  } else if (pagado !== undefined) {
+    if (pagado) {
+      execute('UPDATE registros SET pagado = 1 WHERE id = ?', [Number(req.params.id)]);
+      registrarHistorial(req.session.user.username, 'Registró pago', nombre);
+    } else {
+      execute('UPDATE registros SET pagado = 0 WHERE id = ?', [Number(req.params.id)]);
+      registrarHistorial(req.session.user.username, 'Canceló pago', nombre);
+    }
   }
   res.json({ ok: true });
 });
@@ -442,32 +454,25 @@ app.put('/api/recepcion/asistencia/:id', requireAuth('admin', 'recepcion'), (req
 // ==================== RECEPCIÓN: REGISTRO EN SITIO ====================
 
 app.post('/api/recepcion/registro-sitio', requireAuth('admin', 'recepcion'), (req, res) => {
-  const { nombre, apellidos, iglesia, telefono, correo, taller } = req.body;
+  const { nombre, apellidos, iglesia, ciudad, telefono } = req.body;
 
-  if (!nombre || !apellidos || !iglesia || !taller) {
-    return res.status(400).json({ error: 'Nombre, apellidos, iglesia y taller son obligatorios' });
+  if (!nombre || !apellidos || !iglesia || !ciudad) {
+    return res.status(400).json({ error: 'Nombre, apellidos, iglesia y ciudad son obligatorios' });
   }
 
   const telefonoLimpio = telefono ? telefono.replace(/\D/g, '') : '';
-  const correoLimpio = correo ? correo.toLowerCase().trim() : '';
 
   if (telefonoLimpio) {
-    const existeTelefono = queryOne('SELECT id FROM registros WHERE telefono = ?', [telefonoLimpio]);
+    const existeTelefono = queryOne("SELECT id FROM registros WHERE telefono = ? AND telefono != ''", [telefonoLimpio]);
     if (existeTelefono) {
       return res.status(409).json({ error: 'Ya existe un registro con este número de teléfono' });
-    }
-  }
-  if (correoLimpio) {
-    const existeCorreo = queryOne('SELECT id FROM registros WHERE correo = ?', [correoLimpio]);
-    if (existeCorreo) {
-      return res.status(409).json({ error: 'Ya existe un registro con este correo electrónico' });
     }
   }
 
   try {
     execute(
-      'INSERT INTO registros (nombre, apellidos, iglesia, telefono, correo, taller, pagado, asistio) VALUES (?, ?, ?, ?, ?, ?, 1, 1)',
-      [nombre.trim(), apellidos.trim(), iglesia.trim(), telefonoLimpio || 'N/A', correoLimpio || 'N/A', taller]
+      'INSERT INTO registros (nombre, apellidos, iglesia, ciudad, telefono, pagado, asistio) VALUES (?, ?, ?, ?, ?, 1, 1)',
+      [nombre.trim(), apellidos.trim(), iglesia.trim(), ciudad.trim(), telefonoLimpio]
     );
     const id = lastInsertId();
     registrarHistorial(req.session.user.username, 'Registro en sitio', `${nombre.trim()} ${apellidos.trim()} - ${iglesia.trim()}`);

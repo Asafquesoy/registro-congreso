@@ -1,6 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import './Admin.css'
 
+function PasswordInput({ placeholder, value, onChange, required = true }) {
+  const [show, setShow] = useState(false)
+  return (
+    <div className="auth-field-password-wrap">
+      <input type={show ? 'text' : 'password'} placeholder={placeholder} value={value}
+        onChange={onChange} required={required} />
+      <button type="button" className="password-toggle" onClick={() => setShow(!show)} tabIndex={-1} title={show ? 'Ocultar' : 'Mostrar'}>
+        {show ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        )}
+      </button>
+    </div>
+  )
+}
+
 function ForgotPasswordModal({ onClose }) {
   const [correo, setCorreo] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -114,19 +135,19 @@ function CambiarPasswordScreen({ forzado, onDone }) {
           {!forzado && (
             <div className="auth-field reveal reveal-3">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              <input type="password" placeholder="Contraseña actual" value={passwordActual}
-                onChange={e => setPasswordActual(e.target.value)} required />
+              <PasswordInput placeholder="Contraseña actual" value={passwordActual}
+                onChange={e => setPasswordActual(e.target.value)} />
             </div>
           )}
           <div className="auth-field reveal reveal-3">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <input type="password" placeholder="Nueva contraseña (mín. 6 caracteres)" value={passwordNueva}
-              onChange={e => setPasswordNueva(e.target.value)} required />
+            <PasswordInput placeholder="Nueva contraseña (mín. 6 caracteres)" value={passwordNueva}
+              onChange={e => setPasswordNueva(e.target.value)} />
           </div>
           <div className="auth-field reveal reveal-3">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-            <input type="password" placeholder="Confirmar nueva contraseña" value={passwordConfirm}
-              onChange={e => setPasswordConfirm(e.target.value)} required />
+            <PasswordInput placeholder="Confirmar nueva contraseña" value={passwordConfirm}
+              onChange={e => setPasswordConfirm(e.target.value)} />
           </div>
           <button type="submit" className="auth-btn reveal reveal-4" disabled={enviando}>
             {enviando ? 'Guardando...' : 'Guardar Contraseña'}
@@ -190,8 +211,8 @@ function LoginForm({ onLogin, title, icon, requiredRole }) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
             </svg>
-            <input type="password" placeholder="Contraseña" value={password}
-              onChange={e => setPassword(e.target.value)} required />
+            <PasswordInput placeholder="Contraseña" value={password}
+              onChange={e => setPassword(e.target.value)} />
           </div>
           <button type="submit" className="auth-btn reveal reveal-4">Iniciar Sesión</button>
         </form>
@@ -425,23 +446,20 @@ export default function Admin() {
   }, [darkMode])
 
   // Filters
-  const [filtros, setFiltros] = useState({ busqueda: '', taller: '', pagado: '', asistio: '' })
+  const [filtros, setFiltros] = useState({ busqueda: '', pagado: '', asistio: '' })
 
   const registrosFiltrados = registros.filter(r => {
     if (filtros.busqueda) {
       const q = filtros.busqueda.toLowerCase()
-      const match = `${r.nombre} ${r.apellidos} ${r.iglesia} ${r.correo} ${r.telefono}`.toLowerCase().includes(q)
+      const match = `${r.nombre} ${r.apellidos} ${r.iglesia} ${r.ciudad || ''} ${r.telefono}`.toLowerCase().includes(q)
       if (!match) return false
     }
-    if (filtros.taller && r.taller !== filtros.taller) return false
     if (filtros.pagado === 'si' && !r.pagado) return false
     if (filtros.pagado === 'no' && r.pagado) return false
     if (filtros.asistio === 'si' && !r.asistio) return false
     if (filtros.asistio === 'no' && r.asistio) return false
     return true
   })
-
-  const talleres = [...new Set(registros.map(r => r.taller))].sort()
 
   const isVisor = userRole === 'visor'
 
@@ -634,10 +652,10 @@ export default function Admin() {
           <div className="charts-row reveal reveal-2">
             <section className="card">
               <h3 className="card-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                Registros por Taller
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Registros por Ciudad
               </h3>
-              <BarChart data={stats.porTaller} labelKey="taller" valueKey="total" accent="linear-gradient(90deg, var(--gold-500), var(--gold-400))" />
+              <BarChart data={stats.porCiudad} labelKey="ciudad" valueKey="total" accent="linear-gradient(90deg, var(--gold-500), var(--gold-400))" />
             </section>
             <section className="card">
               <h3 className="card-title">
@@ -671,15 +689,8 @@ export default function Admin() {
           <div className="filter-bar">
             <div className="filter-field" style={{ flex: 2 }}>
               <label>Buscar</label>
-              <input type="text" placeholder="Nombre, iglesia, correo, teléfono..." value={filtros.busqueda}
+              <input type="text" placeholder="Nombre, iglesia, ciudad, teléfono..." value={filtros.busqueda}
                 onChange={e => setFiltros({ ...filtros, busqueda: e.target.value })} />
-            </div>
-            <div className="filter-field">
-              <label>Taller</label>
-              <select value={filtros.taller} onChange={e => setFiltros({ ...filtros, taller: e.target.value })}>
-                <option value="">Todos</option>
-                {talleres.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
             </div>
             <div className="filter-field">
               <label>Pagado</label>
@@ -715,9 +726,8 @@ export default function Admin() {
                     <th>#</th>
                     <th>Nombre</th>
                     <th>Iglesia</th>
+                    <th>Ciudad</th>
                     <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Taller</th>
                     <th>Pagado</th>
                     <th>Asistió</th>
                     <th>Fecha</th>
@@ -730,9 +740,8 @@ export default function Admin() {
                       <td className="cell-muted">{r.id}</td>
                       <td className="cell-bold">{r.nombre} {r.apellidos}</td>
                       <td>{r.iglesia}</td>
-                      <td className="cell-mono">{r.telefono}</td>
-                      <td className="cell-muted">{r.correo}</td>
-                      <td><span className="pill">{r.taller}</span></td>
+                      <td>{r.ciudad || ''}</td>
+                      <td className="cell-mono">{r.telefono || ''}</td>
                       <td><span className={`tag ${r.pagado ? 'tag-yes' : 'tag-no'}`}>{r.pagado ? 'Sí' : 'No'}</span></td>
                       <td><span className={`tag ${r.asistio ? 'tag-yes' : 'tag-no'}`}>{r.asistio ? 'Sí' : 'No'}</span></td>
                       <td className="cell-muted">{new Date(r.fecha_registro).toLocaleDateString('es-MX')}</td>
