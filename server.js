@@ -535,7 +535,11 @@ app.put('/api/cambiar-password', (req, res) => {
   execute('UPDATE usuarios SET password = ?, debe_cambiar_password = 0 WHERE id = ?', [hash, user.id]);
   registrarHistorial(user.username, 'Cambió su contraseña');
 
-  res.json({ ok: true });
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).json({ error: 'Error al actualizar sesión' });
+    req.session.user = { id: user.id, username: user.username, rol: user.rol };
+    res.json({ ok: true });
+  });
 });
 
 // ==================== RECUPERAR CONTRASEÑA ====================
@@ -600,10 +604,12 @@ initDB().then(() => {
     console.log(`  Panel de admin:      http://localhost:${PORT}/admin`);
     console.log(`  Panel de recepción:  http://localhost:${PORT}/recepcion`);
     console.log('');
-    console.log('  Usuarios por defecto:');
-    console.log('    Admin     -> usuario: admin      | contraseña: admin123');
-    console.log('    Recepción -> usuario: recepcion  | contraseña: recepcion123');
-    console.log('    (Crear usuarios Visor desde el panel de admin)\n');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('  Usuarios por defecto:');
+      console.log('    Admin     -> usuario: admin      | contraseña: admin123');
+      console.log('    Recepción -> usuario: recepcion  | contraseña: recepcion123');
+      console.log('    (Crear usuarios Visor desde el panel de admin)\n');
+    }
   });
 }).catch(err => {
   console.error('Error al inicializar la base de datos:', err);

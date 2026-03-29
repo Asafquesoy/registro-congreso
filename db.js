@@ -115,13 +115,13 @@ async function initDB() {
   const adminCheck = db.exec("SELECT id FROM usuarios WHERE username = 'admin'");
   if (adminCheck.length === 0) {
     const hash = bcrypt.hashSync('admin123', 10);
-    db.run("INSERT INTO usuarios (username, password, rol) VALUES (?, ?, ?)", ['admin', hash, 'admin']);
+    db.run("INSERT INTO usuarios (username, password, rol, debe_cambiar_password) VALUES (?, ?, ?, 1)", ['admin', hash, 'admin']);
   }
 
   const recepcionCheck = db.exec("SELECT id FROM usuarios WHERE username = 'recepcion'");
   if (recepcionCheck.length === 0) {
     const hash = bcrypt.hashSync('recepcion123', 10);
-    db.run("INSERT INTO usuarios (username, password, rol) VALUES (?, ?, ?)", ['recepcion', hash, 'recepcion']);
+    db.run("INSERT INTO usuarios (username, password, rol, debe_cambiar_password) VALUES (?, ?, ?, 1)", ['recepcion', hash, 'recepcion']);
   }
 
   guardar();
