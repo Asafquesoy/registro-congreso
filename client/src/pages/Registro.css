@@ -235,7 +235,7 @@
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/images/fondo.jpg');
+  background-image: url('/images/fondo.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -358,7 +358,7 @@
 }
 
 .hero-eyebrow {
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 3.5px;
   text-transform: uppercase;
@@ -372,8 +372,9 @@
   font-size: 3.4rem;
   font-weight: 700;
   color: #ffffff;
-  line-height: 1.05;
+  line-height: 1.15;
   margin-bottom: 4px;
+  padding-bottom: 6px;
   text-shadow: 0 2px 16px rgba(6,26,46,0.5);
 }
 .hero-title-accent {
@@ -421,9 +422,9 @@
   max-width: 440px;
   margin: 0 auto;
   padding: 0 8px;
-  font-size: 1.05rem;
-  line-height: 1.75;
-  color: rgba(255,255,255,0.8);
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.9);
   text-shadow: 0 1px 6px rgba(0,0,0,0.3);
 }
 .hero-invitation strong { color: var(--gold-300); font-weight: 600; }
@@ -443,8 +444,8 @@
 .hero-cta:active { transform: translateY(0); }
 
 .hero-cta-text {
-  padding: 16px 32px;
-  font-size: 1rem;
+  padding: 20px 40px;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -457,7 +458,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px; height: 52px;
+  width: 64px; height: 64px;
   color: var(--gold-300);
   background: var(--midnight-800);
   border: 2px solid var(--gold-400);
@@ -485,7 +486,7 @@
 .reg-header-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/images/fondo.jpg');
+  background-image: url('/images/fondo.png');
   background-size: cover;
   background-position: center top;
 }
@@ -689,7 +690,7 @@
 .conf-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/images/fondo.jpg');
+  background-image: url('/images/fondo.png');
   background-size: cover;
   background-position: center;
 }
@@ -725,7 +726,7 @@
 .conf-header-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/images/fondo.jpg');
+  background-image: url('/images/fondo.png');
   background-size: cover;
   background-position: center;
 }
@@ -1045,12 +1046,12 @@
 }
 @media (max-width: 640px) {
   .hero-title { font-size: 2.4rem; }
-  .hero-eyebrow { font-size: 0.7rem; letter-spacing: 2.5px; }
-  .hero-invitation { font-size: 0.92rem; padding: 0 4px; }
+  .hero-eyebrow { font-size: 0.82rem; letter-spacing: 2.5px; }
+  .hero-invitation { font-size: 1.1rem; padding: 0 4px; }
   .hero-poster { max-width: 260px; }
   .hero-deco-tl, .hero-deco-br { width: 50px; height: 50px; }
-  .hero-cta-text { padding: 13px 20px; font-size: 0.84rem; letter-spacing: 1px; }
-  .hero-cta-arrow { width: 44px; height: 44px; }
+  .hero-cta-text { padding: 16px 28px; font-size: 1.05rem; letter-spacing: 1px; }
+  .hero-cta-arrow { width: 54px; height: 54px; }
   .hero-closed { padding: 14px 20px; font-size: 0.88rem; }
   .reg-card { padding: 24px 18px 20px; border-radius: var(--r-xl); }
   .reg-card-top h3 { font-size: 1.2rem; }
@@ -1076,10 +1077,13 @@
   .conf-btn { padding: 12px 32px; font-size: 0.88rem; }
 }
 @media (max-width: 400px) {
-  .hero-title { font-size: 2rem; }
+  .hero-title { font-size: 2.2rem; }
   .hero-content { padding: 32px 16px; }
   .hero-logo { width: 80px; height: 80px; }
   .hero-year { letter-spacing: 5px; font-size: 0.95rem; }
+  .hero-invitation { font-size: 1rem; }
+  .hero-cta-text { padding: 15px 24px; font-size: 1rem; }
+  .hero-cta-arrow { width: 50px; height: 50px; }
   .conf-header-content { flex-direction: column; text-align: center; }
   .conf-header-text { text-align: center; }
   .field input, .field select { padding: 14px 16px; font-size: 1rem; }

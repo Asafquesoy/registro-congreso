@@ -188,10 +188,6 @@ app.post('/api/registro', registroLimiter, (req, res) => {
       return res.status(400).json({ error: 'El número de teléfono debe tener al menos 10 dígitos' });
     }
 
-    const existeTelefono = queryOne("SELECT id FROM registros WHERE telefono = ? AND telefono != ''", [telefonoLimpio]);
-    if (existeTelefono) {
-      return res.status(409).json({ error: 'Ya existe un registro con este número de teléfono' });
-    }
   }
 
   try {
@@ -496,13 +492,6 @@ app.post('/api/recepcion/registro-sitio', requireAuth('admin', 'recepcion'), (re
   }
 
   const telefonoLimpio = telefono ? telefono.replace(/\D/g, '') : '';
-
-  if (telefonoLimpio) {
-    const existeTelefono = queryOne("SELECT id FROM registros WHERE telefono = ? AND telefono != ''", [telefonoLimpio]);
-    if (existeTelefono) {
-      return res.status(409).json({ error: 'Ya existe un registro con este número de teléfono' });
-    }
-  }
 
   try {
     execute(
