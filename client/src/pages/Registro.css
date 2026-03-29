@@ -1,4 +1,139 @@
 /* ================================================================
+   ERROR MODAL
+   ================================================================ */
+.error-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 26, 46, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.error-modal {
+  background: var(--cream-50);
+  border-radius: var(--r-xl);
+  padding: 36px 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--cream-200);
+  animation: slideUp 0.28s var(--ease-out);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.error-modal-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--rose-100);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  color: var(--rose-500);
+}
+
+.error-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--midnight-900);
+  margin: 0 0 12px;
+}
+
+.error-modal-msg {
+  font-size: 0.95rem;
+  color: var(--cream-700);
+  margin: 0 0 22px;
+  line-height: 1.6;
+  background: var(--rose-100);
+  border: 1px solid var(--rose-400);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  color: var(--rose-600);
+}
+
+.error-modal-contact {
+  border-top: 1px solid var(--cream-200);
+  padding-top: 18px;
+  margin-bottom: 20px;
+}
+
+.error-modal-contact p {
+  font-size: 0.85rem;
+  color: var(--cream-500);
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+
+.error-modal-redes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.red-social {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--r-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity var(--t-fast), transform var(--t-fast);
+}
+
+.red-social:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+.red-social--ig {
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366);
+  color: white;
+}
+
+.red-social--fb {
+  background: #1877f2;
+  color: white;
+}
+
+.error-modal-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--midnight-900), var(--midnight-800));
+  color: white;
+  border: none;
+  border-radius: var(--r-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity var(--t-fast), transform var(--t-fast);
+}
+
+.error-modal-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ================================================================
    PAGE TRANSITIONS
    ================================================================ */
 .page-wrapper {
@@ -571,7 +706,7 @@
   position: relative;
   background: var(--cream-50);
   border-radius: var(--r-2xl);
-  padding: 48px 40px;
+  padding: 0 40px 40px;
   text-align: center;
   max-width: 520px;
   width: 100%;
@@ -582,7 +717,7 @@
 
 /* Branded header */
 .conf-header {
-  margin: -48px -40px 24px;
+  margin: 0 -40px 0;
   border-radius: var(--r-2xl) var(--r-2xl) 0 0;
   overflow: hidden;
   position: relative;
@@ -680,7 +815,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
+  margin: 24px auto 16px;
   box-shadow: 0 8px 28px rgba(74,153,102,0.35);
   position: relative;
   z-index: 1;
@@ -900,7 +1035,7 @@
   .hero-poster { max-width: 320px; }
   .reg-header { padding: 32px 16px 56px; }
   .reg-header-title { font-size: 1.5rem; }
-  .conf-card { padding: 40px 28px; }
+  .conf-card { padding: 0 28px 36px; }
 }
 @media (max-width: 640px) {
   .hero-title { font-size: 2.4rem; }
@@ -917,8 +1052,8 @@
   .reg-body { margin-top: -36px; padding: 0 10px; }
   .reg-submit { padding: 14px; font-size: 0.92rem; }
   .conf { padding: 16px; }
-  .conf-card { padding: 36px 20px; border-radius: var(--r-xl); }
-  .conf-header { margin: -36px -20px 18px; border-radius: var(--r-xl) var(--r-xl) 0 0; }
+  .conf-card { padding: 0 20px 28px; border-radius: var(--r-xl); }
+  .conf-header { margin: 0 -20px 0; border-radius: var(--r-xl) var(--r-xl) 0 0; }
   .conf-header-content { padding: 16px; gap: 12px; }
   .conf-header-logo { width: 40px; height: 40px; }
   .conf-header-eyebrow { font-size: 0.58rem; letter-spacing: 1.5px; }

@@ -89,8 +89,13 @@ app.use('/images', express.static(path.resolve(__dirname, 'images')));
 const reactBuild = path.resolve(__dirname, 'public_react');
 app.use(express.static(reactBuild));
 
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+  console.error('ERROR: SESSION_SECRET no está configurado. Defínalo en el archivo .env antes de iniciar en producción.');
+  process.exit(1);
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'congreso-iglesias-sanas-betsaida-2026',
+  secret: process.env.SESSION_SECRET || 'dev-only-secret-no-usar-en-produccion',
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -162,6 +167,14 @@ app.post('/api/registro', registroLimiter, (req, res) => {
 
   if (!nombre || !apellidos || !iglesia || !ciudad) {
     return res.status(400).json({ error: 'Nombre, apellidos, iglesia y ciudad son obligatorios' });
+  }
+
+  const existePersona = queryOne(
+    'SELECT id FROM registros WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)',
+    [nombre.trim(), apellidos.trim()]
+  );
+  if (existePersona) {
+    return res.status(409).json({ error: 'Ya existe una persona registrada con ese nombre y apellidos' });
   }
 
   let telefonoLimpio = '';
@@ -517,16 +530,15 @@ app.put('/api/cambiar-password', (req, res) => {
 // ==================== RECUPERAR CONTRASEÑA ====================
 
 app.post('/api/recuperar-password', async (req, res) => {
-  const { correo } = req.body;
+  const { username, correo } = req.body;
 
-  if (!correo) {
-    return res.status(400).json({ error: 'Debe proporcionar un correo electrónico' });
+  if (!username || !correo) {
+    return res.status(400).json({ error: 'Debe proporcionar el nombre de usuario y el correo electrónico' });
   }
 
-  const user = queryOne('SELECT * FROM usuarios WHERE correo = ?', [correo.trim().toLowerCase()]);
+  const user = queryOne('SELECT * FROM usuarios WHERE username = ? AND correo = ?', [username.trim(), correo.trim().toLowerCase()]);
   if (!user) {
-    // No revelar si el correo existe o no
-    return res.json({ ok: true, message: 'Si el correo está registrado, recibirá una nueva contraseña' });
+    return res.status(404).json({ error: 'No se encontró ninguna cuenta con ese usuario y correo' });
   }
 
   // Generar nueva contraseña temporal

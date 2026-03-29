@@ -1,5 +1,41 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import './Registro.css'
+
+function ErrorModal({ mensaje, onClose }) {
+  return createPortal(
+    <div className="error-modal-overlay" onClick={onClose}>
+      <div className="error-modal" onClick={e => e.stopPropagation()}>
+        <div className="error-modal-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <h3 className="error-modal-title">No se pudo completar el registro</h3>
+        <p className="error-modal-msg">{mensaje}</p>
+        <div className="error-modal-contact">
+          <p>Si cree que es un error o necesita ayuda, contáctenos en nuestras redes sociales:</p>
+          <div className="error-modal-redes">
+            <a href="https://www.instagram.com/crb_betsaida/" target="_blank" rel="noopener noreferrer" className="red-social red-social--ig">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+              Instagram
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61584189146289&locale=es_LA" target="_blank" rel="noopener noreferrer" className="red-social red-social--fb">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+              </svg>
+              Facebook
+            </a>
+          </div>
+        </div>
+        <button className="error-modal-btn" onClick={onClose}>Entendido</button>
+      </div>
+    </div>,
+    document.body
+  )
+}
 
 function DecoLine() {
   return (
@@ -204,14 +240,7 @@ export default function Registro() {
                   <h3>Complete sus datos para registrarse</h3>
                 </div>
 
-                {error && (
-                  <div className="reg-alert" role="alert">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
-                    <span>{error}</span>
-                  </div>
-                )}
+                {error && <ErrorModal mensaje={error} onClose={() => setError('')} />}
 
                 <form onSubmit={handleSubmit} className="reg-form">
                   <div className="reg-grid">
@@ -236,13 +265,13 @@ export default function Registro() {
                   <div className="field field-anim" style={{ '--fi': 3 }}>
                     <label htmlFor="ciudad">Ciudad de procedencia</label>
                     <input type="text" id="ciudad" name="ciudad" value={form.ciudad}
-                      onChange={handleChange} placeholder="Ej: Ciudad Mante" required />
+                      onChange={handleChange} placeholder="Nombre de su ciudad" required />
                   </div>
 
                   <div className="field field-anim" style={{ '--fi': 4 }}>
                     <label htmlFor="telefono">Número de teléfono <span className="field-optional">(opcional)</span></label>
                     <input type="tel" id="telefono" name="telefono" value={form.telefono}
-                      onChange={handleChange} placeholder="Ej: 831 123 4567" autoComplete="tel" />
+                      onChange={handleChange} placeholder="10 dígitos" autoComplete="tel" />
                     <span className="field-hint">Si lo proporciona, escriba su número a 10 dígitos</span>
                   </div>
 

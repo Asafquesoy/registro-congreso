@@ -4,9 +4,15 @@ import './Admin.css'
 function PasswordInput({ placeholder, value, onChange, required = true }) {
   const [show, setShow] = useState(false)
   return (
-    <div className="auth-field-password-wrap">
-      <input type={show ? 'text' : 'password'} placeholder={placeholder} value={value}
-        onChange={onChange} required={required} />
+    <>
+      <input
+        className="password-input"
+        type={show ? 'text' : 'password'}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        required={required}
+      />
       <button type="button" className="password-toggle" onClick={() => setShow(!show)} tabIndex={-1} title={show ? 'Ocultar' : 'Mostrar'}>
         {show ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,11 +24,12 @@ function PasswordInput({ placeholder, value, onChange, required = true }) {
           </svg>
         )}
       </button>
-    </div>
+    </>
   )
 }
 
 function ForgotPasswordModal({ onClose }) {
+  const [username, setUsername] = useState('')
   const [correo, setCorreo] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
@@ -38,7 +45,7 @@ function ForgotPasswordModal({ onClose }) {
       const res = await fetch('/api/recuperar-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo })
+        body: JSON.stringify({ username, correo })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error); return }
@@ -55,12 +62,19 @@ function ForgotPasswordModal({ onClose }) {
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>&times;</button>
         <h3 className="modal-title">Recuperar Contraseña</h3>
-        <p className="modal-desc">Ingrese el correo electrónico asociado a su cuenta. Le enviaremos una nueva contraseña temporal.</p>
+        <p className="modal-desc">Ingrese su nombre de usuario y el correo asociado a su cuenta. Le enviaremos una nueva contraseña temporal.</p>
 
         {error && <div className="auth-error">{error}</div>}
         {mensaje && <div className="modal-success">{mensaje}</div>}
 
         <form onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <input type="text" placeholder="Nombre de usuario" value={username}
+              onChange={e => setUsername(e.target.value)} required />
+          </div>
           <div className="auth-field">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <input type="email" placeholder="correo@ejemplo.com" value={correo}
@@ -237,13 +251,15 @@ function StatCard({ numero, etiqueta, icono, accent }) {
   )
 }
 
-function BarChart({ data, labelKey, valueKey, accent }) {
+function BarChart({ data, labelKey, valueKey, accent, limit = 10 }) {
   if (!data || data.length === 0) return <p className="empty-state">Sin datos aún</p>
+  const [showAll, setShowAll] = useState(false)
+  const visible = showAll ? data : data.slice(0, limit)
   const max = Math.max(...data.map(d => d[valueKey]), 1)
 
   return (
     <div className="chart">
-      {data.map((d, i) => (
+      {visible.map((d, i) => (
         <div key={i} className="chart-row">
           <span className="chart-label">{d[labelKey]}</span>
           <div className="chart-track">
@@ -257,6 +273,11 @@ function BarChart({ data, labelKey, valueKey, accent }) {
           </div>
         </div>
       ))}
+      {data.length > limit && (
+        <button className="chart-show-more" onClick={() => setShowAll(v => !v)}>
+          {showAll ? 'Ver menos' : `Ver ${data.length - limit} más`}
+        </button>
+      )}
     </div>
   )
 }

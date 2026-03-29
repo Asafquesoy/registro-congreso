@@ -5,8 +5,8 @@ import './Recepcion.css'
 function PasswordInput({ placeholder, value, onChange, required = true }) {
   const [show, setShow] = useState(false)
   return (
-    <div className="auth-field-password-wrap">
-      <input type={show ? 'text' : 'password'} placeholder={placeholder} value={value}
+    <>
+      <input className="password-input" type={show ? 'text' : 'password'} placeholder={placeholder} value={value}
         onChange={onChange} required={required} />
       <button type="button" className="password-toggle" onClick={() => setShow(!show)} tabIndex={-1} title={show ? 'Ocultar' : 'Mostrar'}>
         {show ? (
@@ -19,7 +19,7 @@ function PasswordInput({ placeholder, value, onChange, required = true }) {
           </svg>
         )}
       </button>
-    </div>
+    </>
   )
 }
 
@@ -229,14 +229,14 @@ function PersonaCard({ persona, onAccion }) {
   const initials = (persona.nombre[0] || '') + (persona.apellidos[0] || '')
 
   return (
-    <div className={`persona ${persona.pagado && persona.asistio ? 'persona--paid' : ''} reveal`}>
+    <div className={`persona ${!!persona.pagado && !!persona.asistio ? 'persona--paid' : ''} reveal`}>
       <div className="persona-head">
         <div className="persona-avatar">{initials}</div>
         <div className="persona-identity">
           <h3>{persona.nombre} {persona.apellidos}</h3>
           <span>{persona.iglesia}{persona.ciudad ? ` — ${persona.ciudad}` : ''}</span>
         </div>
-        {persona.pagado && persona.asistio && (
+        {!!persona.pagado && !!persona.asistio && (
           <div className="persona-stamp">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
@@ -299,12 +299,12 @@ function PersonaCard({ persona, onAccion }) {
               Pago y Asistencia
             </button>
           )}
-          {persona.pagado && (
+          {!!persona.pagado && (
             <button className="btn-undo" onClick={() => onAccion(persona.id, 'cancelarPago')}>
               Cancelar Pago
             </button>
           )}
-          {persona.asistio && (
+          {!!persona.asistio && (
             <button className="btn-undo" onClick={() => onAccion(persona.id, 'cancelarAsistencia')}>
               Cancelar Asistencia
             </button>

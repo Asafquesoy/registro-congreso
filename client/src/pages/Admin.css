@@ -91,20 +91,30 @@
   border-left: 3px solid var(--rose-500);
   text-align: left;
 }
-
+/* ================================================================
+   1. REGLAS DEL CONTENEDOR PRINCIPAL
+   ================================================================ */
 .auth-field {
   position: relative;
   margin-bottom: 14px;
 }
-.auth-field svg {
+
+/* El símbolo '>' asegura que SOLO el candado/muñequito se vaya a la izquierda, ignorando el ojito */
+.auth-field > svg {
   position: absolute;
-  left: 14px; top: 50%;
+  left: 14px; 
+  top: 50%;
   transform: translateY(-50%);
   color: var(--cream-400);
+  z-index: 2;
+  pointer-events: none;
 }
+
+/* Este es el estilo global de TODOS los inputs */
 .auth-field input {
   width: 100%;
-  padding: 13px 16px 13px 44px;
+  box-sizing: border-box; /* Evita que el input se salga del cuadro */
+  padding: 13px 16px 13px 44px; /* Los 44px de la izquierda separan el texto del candado */
   font-size: 0.95rem;
   border: 1.5px solid var(--cream-300);
   border-radius: var(--r-md);
@@ -112,11 +122,13 @@
   color: var(--cream-900);
   transition: border-color var(--t-fast), box-shadow var(--t-fast);
 }
+
 .auth-field input:focus {
   outline: none;
   border-color: var(--gold-400);
   box-shadow: 0 0 0 3px rgba(201,150,43,0.1);
 }
+
 .auth-field input::placeholder {
   color: var(--cream-400);
 }
@@ -143,45 +155,37 @@
 }
 
 /* ================================================================
-   PASSWORD TOGGLE
+   2. PASSWORD TOGGLE (EL BOTÓN DEL OJITO)
    ================================================================ */
-.auth-field-password-wrap {
-  position: relative;
-  flex: 1;
+
+/* El input de contraseña necesita espacio a la derecha para el ojito */
+.auth-field input.password-input {
+  padding-right: 44px;
 }
-.auth-field-password-wrap input {
-  width: 100%;
-  padding: 13px 44px 13px 0;
-  font-size: 0.95rem;
-  border: none;
-  background: transparent;
-  color: var(--cream-900);
-  outline: none;
-}
-.auth-field-password-wrap input::placeholder {
-  color: var(--cream-400);
-}
+
+/* El ojito es hijo directo de .auth-field, igual que el candado */
 .password-toggle {
   position: absolute;
-  right: 4px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: var(--cream-400);
-  padding: 6px;
-  border-radius: 6px;
+  padding: 4px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color var(--t-fast), background var(--t-fast);
+  z-index: 2;
 }
+
 .password-toggle:hover {
   color: var(--midnight-600);
   background: var(--cream-100);
 }
-
 /* ================================================================
    ADMIN LAYOUT
    ================================================================ */
@@ -343,6 +347,21 @@
   font-size: 0.78rem;
   font-weight: 700;
   text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.chart-show-more {
+  margin-top: 8px;
+  background: none;
+  border: 1.5px solid var(--cream-300);
+  border-radius: var(--r-sm);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  color: var(--cream-600);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+.chart-show-more:hover {
+  border-color: var(--gold-400);
+  color: var(--gold-600);
 }
 
 /* ================================================================
