@@ -832,6 +832,12 @@
 @keyframes drawCheck {
   to { stroke-dashoffset: 0; }
 }
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.15); }
+  80%  { transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
 
 .conf-title {
   font-family: var(--font-display);

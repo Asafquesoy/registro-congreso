@@ -169,6 +169,10 @@ app.post('/api/registro', registroLimiter, (req, res) => {
     return res.status(400).json({ error: 'Nombre, apellidos, iglesia y ciudad son obligatorios' });
   }
 
+  if (nombre.length > 100 || apellidos.length > 100 || iglesia.length > 150 || ciudad.length > 100) {
+    return res.status(400).json({ error: 'Uno o más campos exceden la longitud máxima permitida' });
+  }
+
   const existePersona = queryOne(
     'SELECT id FROM registros WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)',
     [nombre.trim(), apellidos.trim()]
@@ -233,15 +237,21 @@ app.get('/api/admin/descargar', requireAuth('admin', 'visor'), (req, res) => {
 
   const headers = ['ID', 'Nombre', 'Apellidos', 'Iglesia', 'Ciudad', 'Teléfono', 'Fecha Registro', 'Pagado', 'Asistió'];
 
+  const csvSafe = v => {
+    const s = String(v ?? '').replace(/"/g, '""');
+    // Prevenir inyección de fórmulas CSV (Excel/Sheets)
+    return /^[=+\-@|]/.test(s) ? `"'${s}"` : `"${s}"`;
+  };
+
   const csvRows = [headers.join(',')];
   for (const r of registros) {
     csvRows.push([
       r.id,
-      `"${r.nombre}"`,
-      `"${r.apellidos}"`,
-      `"${r.iglesia}"`,
-      `"${r.ciudad || ''}"`,
-      r.telefono || '',
+      csvSafe(r.nombre),
+      csvSafe(r.apellidos),
+      csvSafe(r.iglesia),
+      csvSafe(r.ciudad),
+      csvSafe(r.telefono),
       r.fecha_registro,
       r.pagado ? 'Sí' : 'No',
       r.asistio ? 'Sí' : 'No'
@@ -473,6 +483,18 @@ app.post('/api/recepcion/registro-sitio', requireAuth('admin', 'recepcion'), (re
     return res.status(400).json({ error: 'Nombre, apellidos, iglesia y ciudad son obligatorios' });
   }
 
+  if (nombre.length > 100 || apellidos.length > 100 || iglesia.length > 150 || ciudad.length > 100) {
+    return res.status(400).json({ error: 'Uno o más campos exceden la longitud máxima permitida' });
+  }
+
+  const existePersonaSitio = queryOne(
+    'SELECT id FROM registros WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)',
+    [nombre.trim(), apellidos.trim()]
+  );
+  if (existePersonaSitio) {
+    return res.status(409).json({ error: 'Ya existe una persona registrada con ese nombre y apellidos' });
+  }
+
   const telefonoLimpio = telefono ? telefono.replace(/\D/g, '') : '';
 
   if (telefonoLimpio) {
@@ -529,7 +551,7 @@ app.put('/api/cambiar-password', (req, res) => {
 
 // ==================== RECUPERAR CONTRASEÑA ====================
 
-app.post('/api/recuperar-password', async (req, res) => {
+app.post('/api/recuperar-password', authLimiter, async (req, res) => {
   const { username, correo } = req.body;
 
   if (!username || !correo) {
@@ -538,7 +560,8 @@ app.post('/api/recuperar-password', async (req, res) => {
 
   const user = queryOne('SELECT * FROM usuarios WHERE username = ? AND correo = ?', [username.trim(), correo.trim().toLowerCase()]);
   if (!user) {
-    return res.status(404).json({ error: 'No se encontró ninguna cuenta con ese usuario y correo' });
+    // Respuesta genérica para no revelar si el usuario/correo existe
+    return res.json({ ok: true, message: 'Si los datos son correctos, recibirá una nueva contraseña en su correo' });
   }
 
   // Generar nueva contraseña temporal
